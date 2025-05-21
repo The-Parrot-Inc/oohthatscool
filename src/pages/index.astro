@@ -1,0 +1,31 @@
+---
+// This is the frontmatter section of the Astro component
+// You can add JavaScript code here
+import DaysWithoutRust from '../components/DaysWithoutRust.astro';
+import '../styles/globals.css';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Days without discovering a Rust project</title>
+  </head>
+  <body class="min-h-screen beach-background">
+    <!-- Beach elements -->
+    <div class="sun"></div>
+    <div class="cloud cloud-1"></div>
+    <div class="cloud cloud-2"></div>
+    <div class="cloud cloud-3"></div>
+    <div class="water-waves"></div>
+    
+    <!-- Ferris mascot -->
+    <div class="ferris-mascot"></div>
+    
+    <div class="container mx-auto relative z-10">
+      <div class="flex justify-center items-center min-h-[80vh]">
+        <DaysWithoutRust />
+      </div>
+    </div>
+  </body>
+</html>

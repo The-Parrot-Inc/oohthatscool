@@ -1,0 +1,395 @@
+---
+// DaysWithoutRust.astro
+import LastProject from './react/LastProject';
+---
+
+<div class="w-full max-w-md mx-auto">
+  <!-- Notification component (initially hidden) -->
+  <div id="notification" class="mb-4 rounded-lg px-4 py-3 border border-transparent hidden transform transition-all duration-300 opacity-0 translate-y-[-1rem]">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+        </svg>
+        <p id="notification-text" class="text-sm font-medium"></p>
+      </div>
+      <button id="close-notification" class="text-lg font-medium leading-none">&times;</button>
+    </div>
+  </div>
+
+  <div class="rounded-xl border bg-card text-card-foreground shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+    <!-- Card Header -->
+    <div class="p-6 bg-gradient-to-r from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
+      <h3 class="text-2xl sm:text-3xl font-bold tracking-tight text-center leading-tight">
+        Days since we last said <br/>“Ooh, That’s Cool!”
+      </h3>
+    </div>
+    
+    <div class="p-6">
+      <!-- Counter Display -->
+      <div class="text-center p-5 mb-6 bg-slate-50 dark:bg-slate-900/50 rounded-xl">
+        <div id="counter-display" class="flex justify-center items-end space-x-6">
+          <div class="flex flex-col items-center">
+            <span id="days" class="text-5xl font-extrabold text-slate-800 dark:text-slate-100">0</span>
+            <span class="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mt-1">days</span>
+          </div>
+          <div class="flex flex-col items-center">
+            <span id="hours" class="text-5xl font-extrabold text-slate-800 dark:text-slate-100">0</span>
+            <span class="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mt-1">hrs</span>
+          </div>
+          <div class="flex flex-col items-center">
+            <span id="minutes" class="text-5xl font-extrabold text-slate-800 dark:text-slate-100">0</span>
+            <span class="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mt-1">min</span>
+          </div>
+        </div>
+        <p id="last-project-date" class="text-xs font-medium text-slate-500 dark:text-slate-400 mt-3 py-1 px-3 bg-white dark:bg-slate-800 rounded-full inline-block">No projects submitted yet</p>
+      </div>
+      
+      <!-- Project Form Modal (Astro-only) -->
+      <div class="mb-8">
+        <button id="openModalBtn" class="inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white h-12 px-5 py-2 w-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0">
+          Submit Rust Project
+        </button>
+        
+        <!-- Modal overlay -->
+        <div id="projectModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center hidden z-50">
+          <div class="bg-background rounded-xl shadow-xl max-w-md w-full mx-4 border">
+            <div class="p-6">
+              <div class="flex flex-col space-y-1.5 mb-4">
+                <h3 class="text-xl font-bold leading-none tracking-tight">Submit Rust Project</h3>
+                <p class="text-sm text-muted-foreground">
+                  Enter the details of your Rust project to reset the counter.
+                </p>
+              </div>
+              
+              <form id="projectForm" class="space-y-4">
+                <div class="space-y-2">
+                  <label for="project-name" class="text-sm font-medium">Project Name <span class="text-destructive">*</span></label>
+                  <input 
+                    id="project-name" 
+                    type="text" 
+                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="Enter your Rust project name"
+                    required
+                  />
+                </div>
+                
+                <div class="space-y-2">
+                  <label for="project-url" class="text-sm font-medium">Project URL <span class="text-destructive">*</span></label>
+                  <input 
+                    id="project-url" 
+                    type="url" 
+                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="https://github.com/username/project"
+                    required
+                  />
+                </div>
+                
+                <div class="space-y-2">
+                  <label for="project-description" class="text-sm font-medium">Description <span class="text-destructive">*</span></label>
+                  <textarea 
+                    id="project-description" 
+                    class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="Brief description of your project"
+                    required
+                  ></textarea>
+                </div>
+                
+                <div class="space-y-2">
+                  <label for="github-username" class="text-sm font-medium">Your github username <span class="text-destructive">*</span></label>
+                  <input 
+                    id="github-username" 
+                    type="text" 
+                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="Your GitHub username"
+                    required
+                  />
+                </div>
+                
+                <div class="space-y-2">
+                  <label class="text-sm font-medium">Tags <span class="text-destructive">*</span></label>
+                  <div class="flex flex-wrap gap-2">
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                      <input type="checkbox" name="project-tags" value="cli" class="form-checkbox h-4 w-4" />
+                      <span>CLI</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                      <input type="checkbox" name="project-tags" value="web" class="form-checkbox h-4 w-4" />
+                      <span>Web</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                      <input type="checkbox" name="project-tags" value="wasm" class="form-checkbox h-4 w-4" />
+                      <span>WASM</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                      <input type="checkbox" name="project-tags" value="tool" class="form-checkbox h-4 w-4" />
+                      <span>Tool</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                      <input type="checkbox" name="project-tags" value="library" class="form-checkbox h-4 w-4" />
+                      <span>Library</span>
+                    </label>
+                  </div>
+                </div>
+                
+                <div class="flex justify-end space-x-2 pt-4">
+                  <button 
+                    type="button" 
+                    id="cancelBtn"
+                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white h-10 px-4 py-2 shadow-md hover:shadow hover:scale-[1.02]"
+                  >
+                    Submit Project
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Recent Projects Preview -->
+      <div class="border-t pt-5">
+        <div class="flex justify-between items-center mb-4">
+          <h4 class="text-xl font-bold tracking-tight">Latest Project</h4>
+          <a href="/projects" class="text-sm font-medium text-primary hover:underline transition-colors">View all</a>
+        </div>
+        
+        <!-- React Island for projects list -->
+        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3">
+          <LastProject client:load />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Initialize variables for the component
+  let lastSubmission = null;
+  
+  // Function to update the counter
+  function updateCounter() {
+    const counterDisplay = document.getElementById('counter-display');
+    const daysElement = document.getElementById('days');
+    const hoursElement = document.getElementById('hours');
+    const minutesElement = document.getElementById('minutes');
+    const lastProjectDateElement = document.getElementById('last-project-date');
+    
+    if (!lastSubmission) {
+      daysElement.textContent = "0";
+      hoursElement.textContent = "0";
+      minutesElement.textContent = "0";
+      lastProjectDateElement.textContent = "No projects submitted yet";
+      return;
+    }
+    
+    const now = new Date();
+    const lastDate = new Date(lastSubmission);
+    const diffMs = now - lastDate;
+    
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    daysElement.textContent = days;
+    hoursElement.textContent = hours;
+    minutesElement.textContent = minutes;
+    
+    // Format date in a more concise way
+    const formattedDate = lastDate.toLocaleDateString(undefined, { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+    const formattedTime = lastDate.toLocaleTimeString(undefined, {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    
+    lastProjectDateElement.textContent = `Updated: ${formattedDate} at ${formattedTime}`;
+  }
+  
+  // Function to handle project submission from the modal
+  async function handleProjectSubmit(event) {
+    event.preventDefault();
+    
+    const projectName = document.getElementById('project-name').value.trim();
+    const projectUrl = document.getElementById('project-url').value.trim();
+    const projectDescription = document.getElementById('project-description').value.trim();
+    const githubUsername = document.getElementById('github-username').value.trim();
+    
+    // Get selected tags
+    const checkboxes = document.querySelectorAll('input[name="project-tags"]:checked');
+    const tags = Array.from(checkboxes).map(checkbox => checkbox.value);
+    
+    if (!projectName || !projectUrl || !projectDescription || !githubUsername || tags.length === 0) {
+      return;
+    }
+    
+    // Create a new project entry
+    const submitted_at = new Date().toISOString();
+    const newProject = {
+      name: projectName,
+      url: projectUrl,
+      description: projectDescription,
+      username: githubUsername,
+      tags: tags,
+      submitted_at: submitted_at
+    };
+    
+    try {
+      // Submit the new project via API
+      const response = await fetch('/api/projects', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newProject)
+      });
+      
+      // Parse the JSON response first
+      const data = await response.json();
+      
+      // Then check if the response was ok
+      if (!response.ok) {
+        throw new Error(`API error: ${data.error || response.statusText}`);
+      }
+      
+      // Update last submission time
+      lastSubmission = submitted_at;
+      
+      // Update the display
+      updateCounter();
+      
+      // Close the modal
+      toggleModal(false);
+      
+      // Reset form
+      document.getElementById('projectForm').reset();
+      
+      // Show notification
+      showNotification("New rust project is under review", "success");
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      showNotification(`Error submitting project: ${err.message}`, 'error');
+    }
+  }
+  
+  // Function to toggle modal visibility
+  function toggleModal(show) {
+    const modal = document.getElementById('projectModal');
+    if (show) {
+      modal.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    } else {
+      modal.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    }
+  }
+  
+  // Function to load data from API
+  async function loadFromAPI() {
+    try {
+      // Fetch the 3 most recent projects from the API
+      const response = await fetch('/api/projects');
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`API error: ${errorData.error || response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.lastSubmission) {
+        // Set last submission time to the most recent project
+        lastSubmission = data.lastSubmission;
+      }
+      
+      updateCounter();
+    } catch (err) {
+      console.error('Unexpected error loading data:', err);
+    }
+  }
+  
+  // Function to show notification
+  function showNotification(message, type = 'info') {
+    const notification = document.getElementById('notification');
+    const notificationText = document.getElementById('notification-text');
+    
+    // Set message
+    notificationText.textContent = message;
+    
+    // Set notification type
+    notification.classList.remove('bg-green-50', 'text-green-800', 'border-green-200', 'bg-red-50', 'text-red-800', 'border-red-200');
+    if (type === 'success') {
+      notification.classList.add('bg-green-50', 'text-green-800', 'border-green-200');
+    } else if (type === 'error') {
+      notification.classList.add('bg-red-50', 'text-red-800', 'border-red-200');
+    }
+    
+    // Show notification
+    notification.classList.remove('hidden', 'opacity-0', 'translate-y-[-1rem]');
+    notification.classList.add('opacity-100', 'translate-y-0');
+    
+    // Auto-hide after 5 seconds
+    const hideTimer = setTimeout(() => {
+      hideNotification();
+    }, 5000);
+    
+    // Store timer ID to clear it if closed manually
+    notification.dataset.timerId = hideTimer;
+  }
+  
+  // Function to hide notification
+  function hideNotification() {
+    const notification = document.getElementById('notification');
+    
+    // Clear timeout if exists
+    if (notification.dataset.timerId) {
+      clearTimeout(parseInt(notification.dataset.timerId));
+      delete notification.dataset.timerId;
+    }
+    
+    // Animate out
+    notification.classList.add('opacity-0', 'translate-y-[-1rem]');
+    
+    // Hide after animation completes
+    setTimeout(() => {
+      notification.classList.add('hidden');
+    }, 300);
+  }
+
+  // Set up the component when the DOM is loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    // Load data from API
+    loadFromAPI();
+    
+    // Update the counter every minute
+    setInterval(updateCounter, 60000);
+    
+    // Set up modal events
+    const openModalBtn = document.getElementById('openModalBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const projectForm = document.getElementById('projectForm');
+    const modal = document.getElementById('projectModal');
+    const closeNotificationBtn = document.getElementById('close-notification');
+    
+    openModalBtn.addEventListener('click', () => toggleModal(true));
+    cancelBtn.addEventListener('click', () => toggleModal(false));
+    projectForm.addEventListener('submit', handleProjectSubmit);
+    closeNotificationBtn.addEventListener('click', hideNotification);
+    
+    // Close modal if clicking outside content area
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        toggleModal(false);
+      }
+    });
+  });
+</script>
