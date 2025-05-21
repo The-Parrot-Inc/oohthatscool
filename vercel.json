@@ -1,14 +1,18 @@
 {
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "framework": "astro",
-  "outputDirectory": "dist",
-  "builds": [
+  "rewrites": [
+    { "source": "/wp-admin/:path*", "destination": "/404" }
+  ],
+  "redirects": [
+    { "source": "/wp-admin/:path*", "destination": "/", "statusCode": 301 }
+  ],
+  "headers": [
     {
-      "src": "package.json",
-      "use": "@vercel/node",
-      "config": { "includeFiles": ["tests/**"] }
+      "source": "/wp-admin/:path*",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
     }
   ]
 }
