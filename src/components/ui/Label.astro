@@ -1,0 +1,20 @@
+---
+interface Props {
+  class?: string;
+  for?: string;
+}
+
+const {
+  class: className = '',
+  for: forAttribute,
+  ...rest
+} = Astro.props;
+
+// Base label classes
+const baseClasses = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70";
+const classes = `${baseClasses} ${className}`;
+---
+
+<label class={classes} for={forAttribute} {...rest}>
+  <slot />
+</label> 

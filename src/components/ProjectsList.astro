@@ -1,0 +1,81 @@
+---
+import { initializeSupabase } from '../lib/supabase';
+
+interface Props {
+  limit?: number;
+}
+
+const { limit = 3 } = Astro.props;
+
+// Fetch data on the server side
+let projects = [];
+let error = null;
+
+try {
+  const supabase = initializeSupabase();
+  
+  // Fetch the most recent projects from Supabase
+  const { data: projectsData, error: supabaseError } = await supabase
+    .from('rust_projects')
+    .select('*')
+    .eq('active', true)
+    .order('submitted_at', { ascending: false })
+    .limit(limit);
+  
+  if (supabaseError) {
+    console.error('Error loading projects:', supabaseError);
+    error = 'Failed to load projects';
+  } else if (projectsData && projectsData.length > 0) {
+    projects = projectsData;
+  }
+} catch (err) {
+  console.error('Error loading projects:', err);
+  error = 'Failed to load projects';
+}
+---
+
+{error && <ul class="space-y-2 text-sm"><li class="text-muted-foreground">Error loading projects: {error}</li></ul>}
+
+{!error && projects.length === 0 && <ul class="space-y-2 text-sm"><li class="text-muted-foreground">No recent projects</li></ul>}
+
+{!error && projects.length > 0 && (
+  <ul class="space-y-2 text-sm">
+    {projects.map((project, index) => {
+      const projectDate = new Date(project.submitted_at);
+      
+      return (
+        <li class="pb-2 border-b border-border last:border-0 last:pb-0">
+          <div>
+            <span class="font-medium">{project.name}</span>
+            {project.username && (
+              <>
+                <span class="mx-1">by</span>
+                <a 
+                  href={`https://github.com/${project.username}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  class="text-primary hover:underline"
+                >
+                  {project.username}
+                </a>
+              </>
+            )}
+            <span class="block text-xs text-muted-foreground">{projectDate.toLocaleString()}</span>
+            
+            {project.tags && project.tags.length > 0 && (
+              <div class="flex flex-wrap gap-1 mt-1">
+                {project.tags.map((tag) => (
+                  <span 
+                    class="bg-muted text-muted-foreground text-xs px-1.5 py-0.5 rounded"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </li>
+      );
+    })}
+  </ul>
+)} 

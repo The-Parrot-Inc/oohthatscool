@@ -1,5 +1,4 @@
 import { defineConfig } from 'astro/config';
-import react from '@astrojs/react';
 import vercel from "@astrojs/vercel";
 import node from "@astrojs/node";
 const isLocalBuild = Boolean(process.env.LOCAL_BUILD);
@@ -9,6 +8,5 @@ export default defineConfig({
   adapter: isLocalBuild
     ? node({mode: 'standalone'})
     : vercel(),
-  // Add React integration
-  integrations: [react()]
+  // React integration removed as we are now using only Astro components
 });

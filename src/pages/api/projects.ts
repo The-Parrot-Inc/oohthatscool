@@ -192,7 +192,7 @@ export const POST: APIRoute = async ({ request }) => {
       username,
       tags,
       submitted_at,
-      active: true
+      active: projectData.active !== undefined ? projectData.active : false
     };
     
     console.log('[API] Inserting new project into Supabase:', newProject);

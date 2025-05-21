@@ -141,7 +141,7 @@
 /* Ferris mascot positioning */
 .ferris-mascot {
   position: fixed;
-  bottom: -20px;
+  bottom: 0px;
   right: 20px;
   width: 240px;
   height: 180px;
@@ -171,30 +171,65 @@
 /* Clouds */
 .cloud {
   position: absolute;
-  background: white;
-  border-radius: 50%;
-  opacity: 0.8;
+  background: url('../styles/cloud.png') no-repeat;
+  background-size: contain;
+  opacity: 0.4;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.1));
 }
 
 .cloud-1 {
-  width: 100px;
-  height: 60px;
+  width: 150px;
+  height: 100px;
   top: 10%;
   left: 10%;
+  animation: float 25s linear infinite;
 }
 
 .cloud-2 {
-  width: 140px;
-  height: 80px;
+  width: 200px;
+  height: 120px;
   top: 15%;
   left: 60%;
+  animation: float 30s linear infinite reverse;
 }
 
 .cloud-3 {
-  width: 80px;
-  height: 50px;
+  width: 120px;
+  height: 80px;
   top: 25%;
   left: 30%;
+  animation: float 35s linear infinite;
+}
+
+.cloud-4 {
+  width: 180px;
+  height: 110px;
+  top: 8%;
+  left: 40%;
+  animation: float 28s linear infinite reverse;
+  opacity: 0.8;
+}
+
+.cloud-5 {
+  width: 130px;
+  height: 85px;
+  top: 20%;
+  left: 80%;
+  animation: float 32s linear infinite;
+  opacity: 0.7;
+}
+
+/* Cloud animation */
+@keyframes float {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(20px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 /* Sun styling */

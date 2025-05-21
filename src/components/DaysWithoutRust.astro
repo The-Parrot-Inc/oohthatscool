@@ -1,6 +1,43 @@
 ---
 // DaysWithoutRust.astro
-import LastProject from './react/LastProject';
+import LastProject from './LastProject.astro';
+import { initializeSupabase } from '../lib/supabase';
+
+// Fetch the latest submission timestamp on the server side for the counter
+let lastSubmission = null;
+
+try {
+  const supabase = initializeSupabase();
+  
+  const { data: projects, error } = await supabase
+    .from('rust_projects')
+    .select('submitted_at')
+    .eq('active', true)
+    .order('submitted_at', { ascending: false })
+    .limit(1);
+
+  console.log(projects);
+  if (!error && projects && projects.length > 0) {
+    lastSubmission = projects[0].submitted_at;
+  }
+} catch (err) {
+  console.error('Error loading last project timestamp:', err);
+}
+
+// Format the initial counter values for rendering
+let initialDays = 0;
+let initialHours = 0;
+let initialMinutes = 0;
+
+if (lastSubmission) {
+  const now = new Date();
+  const lastDate = new Date(lastSubmission);
+  const diffMs = now - lastDate;
+  
+  initialDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  initialHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  initialMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+}
 ---
 
 <div class="w-full max-w-md mx-auto">
@@ -30,19 +67,21 @@ import LastProject from './react/LastProject';
       <div class="text-center p-3 sm:p-5 mb-4 sm:mb-6 bg-slate-50 dark:bg-slate-900/50 rounded-xl">
         <div id="counter-display" class="flex justify-center items-end space-x-4 sm:space-x-6">
           <div class="flex flex-col items-center">
-            <span id="days" class="text-4xl sm:text-5xl font-extrabold text-slate-800 dark:text-slate-100">0</span>
+            <span id="days" class="text-4xl sm:text-5xl font-extrabold text-slate-800 dark:text-slate-100">{initialDays}</span>
             <span class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mt-1">days</span>
           </div>
           <div class="flex flex-col items-center">
-            <span id="hours" class="text-4xl sm:text-5xl font-extrabold text-slate-800 dark:text-slate-100">0</span>
+            <span id="hours" class="text-4xl sm:text-5xl font-extrabold text-slate-800 dark:text-slate-100">{initialHours}</span>
             <span class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mt-1">hrs</span>
           </div>
           <div class="flex flex-col items-center">
-            <span id="minutes" class="text-4xl sm:text-5xl font-extrabold text-slate-800 dark:text-slate-100">0</span>
+            <span id="minutes" class="text-4xl sm:text-5xl font-extrabold text-slate-800 dark:text-slate-100">{initialMinutes}</span>
             <span class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mt-1">min</span>
           </div>
         </div>
-        <p id="last-project-date" class="text-xs font-medium text-slate-500 dark:text-slate-400 mt-3 py-1 px-3 bg-white dark:bg-slate-800 rounded-full inline-block">No projects submitted yet</p>
+        <p id="last-project-date" class="text-xs font-medium text-slate-500 dark:text-slate-400 mt-3 py-1 px-3 bg-white dark:bg-slate-800 rounded-full inline-block">
+          {lastSubmission ? new Date(lastSubmission).toLocaleString() : "No projects submitted yet"}
+        </p>
       </div>
       
       <!-- Project Form Modal (Astro-only) -->
@@ -160,9 +199,9 @@ import LastProject from './react/LastProject';
           <a href="/projects" class="text-xs sm:text-sm font-medium text-primary hover:underline transition-colors">View all</a>
         </div>
         
-        <!-- React Island for projects list -->
+        <!-- Server-rendered Astro component instead of React island -->
         <div class="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-2 sm:p-3">
-          <LastProject client:load />
+          <LastProject />
         </div>
       </div>
     </div>
@@ -175,45 +214,32 @@ import LastProject from './react/LastProject';
   
   // Function to update the counter
   function updateCounter() {
-    const counterDisplay = document.getElementById('counter-display');
+    const lastProjectDateElement = document.getElementById('last-project-date');
     const daysElement = document.getElementById('days');
     const hoursElement = document.getElementById('hours');
     const minutesElement = document.getElementById('minutes');
-    const lastProjectDateElement = document.getElementById('last-project-date');
     
-    if (!lastSubmission) {
-      daysElement.textContent = "0";
-      hoursElement.textContent = "0";
-      minutesElement.textContent = "0";
-      lastProjectDateElement.textContent = "No projects submitted yet";
-      return;
+    // Get the last project date from the element text content if available
+    const lastProjectDateText = lastProjectDateElement.textContent;
+    
+    if (lastProjectDateText && lastProjectDateText !== "No projects submitted yet") {
+      lastSubmission = new Date(lastProjectDateText);
+      
+      const now = new Date();
+      const diffMs = now - lastSubmission;
+      
+      const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+      
+      daysElement.textContent = days;
+      hoursElement.textContent = hours;
+      minutesElement.textContent = minutes;
     }
-    
-    const now = new Date();
-    const lastDate = new Date(lastSubmission);
-    const diffMs = now - lastDate;
-    
-    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    
-    daysElement.textContent = days;
-    hoursElement.textContent = hours;
-    minutesElement.textContent = minutes;
-    
-    // Format date in a more concise way
-    const formattedDate = lastDate.toLocaleDateString(undefined, { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    });
-    const formattedTime = lastDate.toLocaleTimeString(undefined, {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-    
-    lastProjectDateElement.textContent = `Updated: ${formattedDate} at ${formattedTime}`;
   }
+  
+  // Update counter every minute
+  setInterval(updateCounter, 60000);
   
   // Function to handle project submission from the modal
   async function handleProjectSubmit(event) {
@@ -240,7 +266,8 @@ import LastProject from './react/LastProject';
       description: projectDescription,
       username: githubUsername,
       tags: tags,
-      submitted_at: submitted_at
+      submitted_at: submitted_at,
+      active: false
     };
     
     try {
@@ -274,7 +301,7 @@ import LastProject from './react/LastProject';
       document.getElementById('projectForm').reset();
       
       // Show notification
-      showNotification("New rust project is under review", "success");
+      showNotification("Project submitted successfully! It will appear after review.", "success");
     } catch (err) {
       console.error('Unexpected error:', err);
       showNotification(`Error submitting project: ${err.message}`, 'error');
@@ -290,30 +317,6 @@ import LastProject from './react/LastProject';
     } else {
       modal.classList.add('hidden');
       document.body.classList.remove('overflow-hidden');
-    }
-  }
-  
-  // Function to load data from API
-  async function loadFromAPI() {
-    try {
-      // Fetch the 3 most recent projects from the API
-      const response = await fetch('/api/projects');
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`API error: ${errorData.error || response.statusText}`);
-      }
-      
-      const data = await response.json();
-      
-      if (data.lastSubmission) {
-        // Set last submission time to the most recent project
-        lastSubmission = data.lastSubmission;
-      }
-      
-      updateCounter();
-    } catch (err) {
-      console.error('Unexpected error loading data:', err);
     }
   }
   
@@ -368,10 +371,7 @@ import LastProject from './react/LastProject';
   // Set up the component when the DOM is loaded
   document.addEventListener('DOMContentLoaded', () => {
     // Load data from API
-    loadFromAPI();
-    
-    // Update the counter every minute
-    setInterval(updateCounter, 60000);
+    updateCounter();
     
     // Set up modal events
     const openModalBtn = document.getElementById('openModalBtn');
