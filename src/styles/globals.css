@@ -82,6 +82,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
@@ -97,6 +98,14 @@
   );
   position: relative;
   overflow: hidden;
+  min-height: 100vh;
+}
+
+/* Apply a fixed height on mobile to prevent content shifting */
+@media (max-width: 640px) {
+  .beach-background {
+    background-attachment: fixed;
+  }
 }
 
 .beach-background::before {
@@ -122,6 +131,13 @@
   background-repeat: no-repeat;
 }
 
+/* Make sure the waves are visible on mobile */
+@media (max-width: 640px) {
+  .water-waves {
+    height: 15px;
+  }
+}
+
 /* Ferris mascot positioning */
 .ferris-mascot {
   position: fixed;
@@ -141,6 +157,15 @@
 
 .ferris-mascot:hover {
   transform: rotate(-5deg) translateY(-10px);
+}
+
+@media (max-width: 640px) {
+  .ferris-mascot {
+    width: 150px;
+    height: 120px;
+    bottom: -15px;
+    right: 5px;
+  }
 }
 
 /* Clouds */
@@ -182,4 +207,34 @@
   background: #FFD700;
   border-radius: 50%;
   box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.7);
+}
+
+@media (max-width: 640px) {
+  .sun {
+    width: 60px;
+    height: 60px;
+    top: 5%;
+    right: 5%;
+    box-shadow: 0 0 30px 10px rgba(255, 215, 0, 0.7);
+  }
+}
+
+/* Add smooth scrolling for the whole page */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Improve touch interaction on mobile */
+button, 
+a {
+  touch-action: manipulation;
+}
+
+/* Prevent text selection for UI elements */
+button, 
+.cloud,
+.sun,
+.ferris-mascot,
+.water-waves {
+  user-select: none;
 }
